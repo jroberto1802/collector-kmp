@@ -1,0 +1,15 @@
+.gradle/
+.idea/
+.kotlin/
+**/build/
+local.properties
+*.iml
+.DS_Store
+*.hprof
+*.log
+.tmp/
+artifacts/
+iosApp/Pods/
+iosApp/*.xcworkspace/
+composeApp/schemas/
+Imagem do Codex*.png
