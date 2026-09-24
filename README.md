@@ -50,7 +50,38 @@ APK gerado em `composeApp/build/outputs/apk/debug/composeApp-debug.apk`.
 
 ## iOS
 
-Abra `iosApp/iosApp.xcodeproj` no macOS com Xcode. O build phase do projeto executa `:composeApp:embedAndSignAppleFrameworkForXcode` automaticamente.
+Requisitos: **macOS**, Xcode e **JDK 17+** (Temurin/Zulu).
+
+### 1) Preparar o ambiente (Terminal)
+
+```bash
+cd /caminho/para/collector-kmp
+
+# Confirme o Java 17+
+/usr/libexec/java_home -V
+export JAVA_HOME=$(/usr/libexec/java_home -v 17)
+
+# Gradlew precisa ser executável (após clonar do Windows)
+chmod +x ./gradlew
+
+# Teste o framework fora do Xcode (mostra o erro real, se houver)
+./gradlew :composeApp:embedAndSignAppleFrameworkForXcode
+```
+
+### 2) Abrir e rodar no Xcode
+
+```bash
+open iosApp/iosApp.xcodeproj
+```
+
+Selecione um simulador (ex.: iPhone 16) e rode ▶.
+
+Se ainda falhar em **Build ComposeApp framework**:
+1. No Xcode: **Report navigator** (ícone de balão) → último build → abra o log vermelho do script.
+2. No target **Collector** → **Signing & Capabilities** → escolha seu **Team** (Apple ID).
+3. Product → Clean Build Folder, depois rode de novo.
+
+O build phase já tenta definir `JAVA_HOME` automaticamente; o passo 1 acima confirma se o Gradle consegue compilar.
 
 ## Validação
 
