@@ -50,38 +50,59 @@ APK gerado em `composeApp/build/outputs/apk/debug/composeApp-debug.apk`.
 
 ## iOS
 
-Requisitos: **macOS**, Xcode e **JDK 17+** (Temurin/Zulu).
+Requisitos: **macOS**, Xcode e **JDK 17** (Temurin/Zulu). Evite Java 22+.
+
+### Importante
+
+`embedAndSignAppleFrameworkForXcode` é tarefa de **integração do Xcode**.  
+Rodar só `./gradlew :composeApp:embedAndSignAppleFrameworkForXcode` no Terminal **sem** as variáveis do Xcode costuma falhar (mensagem estranha tipo `What went wrong: 27`).
 
 ### 1) Preparar o ambiente (Terminal)
 
 ```bash
 cd /caminho/para/collector-kmp
 
-# Confirme o Java 17+
+# Use JDK 17 (nao Java 24)
 /usr/libexec/java_home -V
 export JAVA_HOME=$(/usr/libexec/java_home -v 17)
+export PATH="$JAVA_HOME/bin:$PATH"
 
-# Gradlew precisa ser executável (após clonar do Windows)
 chmod +x ./gradlew
 
-# Teste o framework fora do Xcode (mostra o erro real, se houver)
-./gradlew :composeApp:embedAndSignAppleFrameworkForXcode
+# Teste de compilacao iOS no Terminal (este SIM funciona fora do Xcode):
+./gradlew :composeApp:linkDebugFrameworkIosSimulatorArm64 --stacktrace
 ```
 
-### 2) Abrir e rodar no Xcode
+Se esse comando falhar, o log `--stacktrace` mostra a causa (SDK Android ausente, etc.).
+
+Android SDK no Mac (mesmo para build iOS, o módulo usa plugin Android):
+- Instale Android Studio **ou** Command-line Tools
+- Crie `local.properties` na raiz:
+
+```properties
+sdk.dir=/Users/SEU_USER/Library/Android/sdk
+```
+
+### 2) Rodar no Xcode
 
 ```bash
 open iosApp/iosApp.xcodeproj
 ```
 
-Selecione um simulador (ex.: iPhone 16) e rode ▶.
+1. Target **Collector** → **Signing & Capabilities** → escolha seu **Team**
+2. Simulador (iPhone) → ▶ Run
 
-Se ainda falhar em **Build ComposeApp framework**:
-1. No Xcode: **Report navigator** (ícone de balão) → último build → abra o log vermelho do script.
-2. No target **Collector** → **Signing & Capabilities** → escolha seu **Team** (Apple ID).
-3. Product → Clean Build Folder, depois rode de novo.
+O script do Xcode já define `JAVA_HOME` e chama o Gradle com `--no-configuration-cache`.
 
-O build phase já tenta definir `JAVA_HOME` automaticamente; o passo 1 acima confirma se o Gradle consegue compilar.
+### 3) Se ainda falhar no Xcode
+
+1. Report navigator → último build → abra o log do phase **Build ComposeApp framework**
+2. Product → Clean Build Folder
+3. No Terminal, confirme o framework:
+
+```bash
+./gradlew :composeApp:linkDebugFrameworkIosSimulatorArm64
+```
 
 ## Validação
 
